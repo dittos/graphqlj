@@ -9,11 +9,11 @@ public final class Lexer {
         this.prevPosition = 0;
     }
 
-    public Token nextToken() throws Exception {
+    public Token nextToken() throws GraphQLLanguageException {
         return nextToken(prevPosition);
     }
 
-    public Token nextToken(int resetPosition) throws Exception {
+    public Token nextToken(int resetPosition) throws GraphQLLanguageException {
         Token token = readToken(resetPosition);
         prevPosition = token.getEnd();
         return token;
@@ -40,16 +40,17 @@ public final class Lexer {
      * token, then lexes punctuators immediately or calls the appropriate helper
      * fucntion for more complicated tokens.
      */
-    private Token readToken(int fromPosition) throws Exception {
+    private Token readToken(int fromPosition) throws GraphQLLanguageException {
         String body = source.getBody();
         int bodyLength = body.length();
 
         int position = positionAfterWhitespace(body, fromPosition);
-        char code = body.charAt(position);
 
         if (position >= bodyLength) {
             return makeToken(TokenKind.EOF, position, position);
         }
+
+        char code = body.charAt(position);
 
         switch (code) {
         // !
@@ -151,7 +152,7 @@ public final class Lexer {
      * Int:   -?(0|[1-9][0-9]*)
      * Float: -?(0|[1-9][0-9]*)\.[0-9]+(e-?[0-9]+)?
      */
-    private Token readNumber(Source source, int start, char firstCode) throws Exception {
+    private Token readNumber(Source source, int start, char firstCode) throws GraphQLLanguageException {
         char code = firstCode;
         String body = source.getBody();
         int position = start;
@@ -211,7 +212,7 @@ public final class Lexer {
      *
      * "([^"\\\u000A\u000D\u2028\u2029]|(\\(u[0-9a-fA-F]{4}|["\\/bfnrt])))*"
      */
-    private Token readString(Source source, int start) throws Exception {
+    private Token readString(Source source, int start) throws GraphQLLanguageException {
         String body = source.getBody();
         int position = start + 1;
         int chunkStart = position;
@@ -328,8 +329,7 @@ public final class Lexer {
         );
     }
 
-    private Exception error(Source source, int position, String message) {
-        // TODO: better error reporting / narrow exception type
-        return new Exception(message);
+    private GraphQLLanguageException error(Source source, int position, String message) {
+        return new GraphQLLanguageException(source, position, message);
     }
 }

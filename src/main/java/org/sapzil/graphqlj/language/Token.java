@@ -36,4 +36,10 @@ public final class Token {
     public String getValue() {
         return value;
     }
+
+    public String getDesc() {
+        return value != null ?
+                kind.getDesc() + " \"" + value + "\"" :
+                kind.getDesc();
+    }
 }
